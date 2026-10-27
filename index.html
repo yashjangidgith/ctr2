@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlogVerse | Dynamic Blog</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f5ff;
+    color: #222;
+    transition: 0.3s;
+}
+
+/* NAVBAR */
+nav {
+    background: linear-gradient(120deg, #673ab7, #e91e63);
+    padding: 20px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.logo {
+    font-size: 27px;
+    font-weight: bold;
+}
+
+nav button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* HERO */
+.hero {
+    text-align: center;
+    padding: 65px 20px;
+    background: linear-gradient(135deg, #673ab7, #ff4081);
+    color: white;
+}
+
+.hero h1 {
+    font-size: 42px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+}
+
+/* SEARCH */
+.controls {
+    text-align: center;
+    padding: 30px;
+}
+
+input, select {
+    padding: 13px;
+    width: 250px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 5px;
+    outline: none;
+}
+
+/* BLOG GRID */
+.container {
+    width: 85%;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding-bottom: 50px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: 0.3s;
+    animation: fadeIn 0.5s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.card-image {
+    height: 150px;
+    background: linear-gradient(135deg, #673ab7, #ff4081);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+}
+
+.card-content {
+    padding: 22px;
+}
+
+.card h3 {
+    margin-bottom: 12px;
+    text-transform: capitalize;
+}
+
+.card p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.read-btn {
+    margin-top: 18px;
+    padding: 10px 18px;
+    background: #673ab7;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.read-btn:hover {
+    background: #e91e63;
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10;
+}
+
+.modal-content {
+    background: white;
+    padding: 35px;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    text-transform: capitalize;
+}
+
+.modal-content p {
+    line-height: 1.8;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 25px;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    background: #252038;
+    color: white;
+    padding: 25px;
+}
+
+/* DARK MODE */
+.dark {
+    background: #151521;
+    color: white;
+}
+
+.dark .card,
+.dark .modal-content {
+    background: #242438;
+    color: white;
+}
+
+.dark .card p {
+    color: #ccc;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#status {
+    text-align: center;
+    margin: 20px;
+    font-size: 18px;
+}
+
+@media(max-width: 600px) {
+    nav {
+        padding: 15px;
+    }
+
+    .hero h1 {
+        font-size: 30px;
+    }
+
+    .container {
+        width: 92%;
+    }
+
+    input, select {
+        width: 90%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <div class="logo">BlogVerse ✨</div>
+    <button onclick="toggleTheme()">🌙 Toggle Theme</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>Welcome to BlogVerse</h1>
+    <p>Discover stories, ideas and inspiration.</p>
+</section>
+
+<!-- SEARCH AND FILTER -->
+<section class="controls">
+
+    <input
+        type="text"
+        id="search"
+        placeholder="Search articles..."
+        oninput="filterPosts()"
+    >
+
+    <select id="category" onchange="filterPosts()">
+        <option value="all">All Categories</option>
+        <option value="1">Technology</option>
+        <option value="2">Lifestyle</option>
+        <option value="3">Education</option>
+        <option value="4">Travel</option>
+        <option value="5">Business</option>
+    </select>
+
+</section>
+
+<p id="status">Loading articles...</p>
+
+<!-- BLOG POSTS -->
+<div class="container" id="blogContainer"></div>
+
+<!-- ARTICLE POPUP -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalBody"></p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 BlogVerse | Dynamic Blog Website</p>
+    <p>Powered by JSONPlaceholder API</p>
+</footer>
+
+<script>
+
+// API URL
+const API_URL = "https://jsonplaceholder.typicode.com/posts";
+
+let allPosts = [];
+
+// FETCH BLOG POSTS FROM API
+async function fetchPosts() {
+
+    const status = document.getElementById("status");
+
+    try {
+
+        status.innerText = "Loading articles...";
+
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error("API request failed");
+        }
+
+        const data = await response.json();
+
+        allPosts = data;
+
+        displayPosts(allPosts);
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.innerText =
+            "Unable to load articles. Please check your internet connection.";
+
+    }
+}
+
+// DISPLAY BLOG CARDS
+function displayPosts(posts) {
+
+    const container = document.getElementById("blogContainer");
+    const status = document.getElementById("status");
+
+    container.innerHTML = "";
+
+    if (posts.length === 0) {
+        status.innerText = "No articles found!";
+        return;
+    }
+
+    status.innerText = `${posts.length} articles found`;
+
+    const emojis = ["💻", "📚", "🌍", "🚀", "✨"];
+
+    posts.forEach(post => {
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const emoji = emojis[(post.userId - 1) % emojis.length];
+
+        // Use textContent for untrusted API content
+        const image = document.createElement("div");
+        image.className = "card-image";
+        image.textContent = emoji;
+
+        const content = document.createElement("div");
+        content.className = "card-content";
+
+        const title = document.createElement("h3");
+        title.textContent = post.title;
+
+        const description = document.createElement("p");
+        description.textContent = post.body.substring(0, 100) + "...";
+
+        const button = document.createElement("button");
+        button.className = "read-btn";
+        button.textContent = "Read More →";
+        button.addEventListener("click", () => openPost(post.id));
+
+        content.append(title, description, button);
+        card.append(image, content);
+        container.appendChild(card);
+
+    });
+
+}
+
+// SEARCH AND CATEGORY FILTER
+function filterPosts() {
+
+    const search = document.getElementById("search")
+        .value.toLowerCase();
+
+    const category = document.getElementById("category").value;
+
+    const filtered = allPosts.filter(post => {
+
+        const matchesSearch =
+            post.title.toLowerCase().includes(search) ||
+            post.body.toLowerCase().includes(search);
+
+        // Demo categories mapped to API user IDs 1-5
+        const matchesCategory =
+            category === "all" ||
+            post.userId === Number(category);
+
+        return matchesSearch && matchesCategory;
+
+    });
+
+    displayPosts(filtered);
+}
+
+// OPEN FULL ARTICLE
+function openPost(id) {
+
+    const post = allPosts.find(item => item.id === id);
+
+    if (!post) return;
+
+    document.getElementById("modalTitle").textContent = post.title;
+    document.getElementById("modalBody").textContent = post.body;
+
+    document.getElementById("modal").style.display = "flex";
+
+}
+
+// CLOSE ARTICLE
+function closeModal() {
+
+    document.getElementById("modal").style.display = "none";
+
+}
+
+// DARK MODE
+function toggleTheme() {
+
+    document.body.classList.toggle("dark");
+
+}
+
+// CLOSE MODAL WHEN CLICKING OUTSIDE
+document.getElementById("modal").addEventListener("click", function(e) {
+
+    if (e.target === this) {
+        closeModal();
+    }
+
+});
+
+// CLOSE MODAL USING ESCAPE KEY
+document.addEventListener("keydown", function(e) {
+
+    if (e.key === "Escape") {
+        closeModal();
+    }
+
+});
+
+// INITIAL API CALL
+fetchPosts();
+
+</script>
+
+</body>
+</html>
